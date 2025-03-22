@@ -1,0 +1,7 @@
+original_docx/
+pdf_cv/
+processed_cv/
+.env
+src/__pycache__/
+test.ipynb
+job_description.txt
