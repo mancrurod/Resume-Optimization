@@ -28,7 +28,7 @@ def generate_prompt(md_resume: str, job_description: str) -> str:
     {job_description}  
 
     ### **Expected Output:**  
-    Return the **optimized resume in Markdown format**, ensuring it is refined according to the outlined objectives.  
+    Return the **optimized resume in Markdown**, ensuring it is refined according to the outlined objectives.  
     """
 
 

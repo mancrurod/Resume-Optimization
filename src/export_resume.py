@@ -26,43 +26,50 @@ def convert_md_to_html(md_path, html_path):
     html_content = md.render(md_content)
 
     # Wrap the content in a basic HTML structure
-    html_document = f"""<!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Resume</title>
-        <style>
-            body {{
-                font-family: Helvetica, sans-serif;
-                font-size: 16px;
-                line-height: 1.6;
-                margin: 2em;
-                max-width: 800px;
-            }}
-            h1, h2, h3 {{
-                color: #333;
-            }}
-            a {{
-                color: #0066cc;
-                text-decoration: none;
-            }}
-            ul {{
-                padding-left: 40px;
-            }}
-            ul li {{
-                list-style-type: disc;
-                margin-bottom: 5px;
-            }}
-            ol {{
-                padding-left: 40px;
-            }}
-            ol li {{
-                list-style-type: decimal;
-                margin-bottom: 5px;
-            }}
-        </style>
-    </head>
-    <body contenteditable="true">
+    html_document = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Resume</title>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@600&family=Roboto:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {{
+            font-family: 'Roboto', sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            margin: 2em auto;
+            max-width: 800px;
+            color: #222;
+        }}
+        h1 {{
+            font-family: 'EB Garamond', serif;
+            font-weight: 600;
+            font-size: 14pt;
+            color: #222;
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+        }}
+        p {{
+            margin-bottom: 0.8em;
+        }}
+        ul, ol {{
+            padding-left: 2em;
+            margin-bottom: 1em;
+        }}
+        ul li, ol li {{
+            margin-bottom: 4px;
+        }}
+        a {{
+            color: #0056b3;
+            text-decoration: none;
+        }}
+        a:hover {{
+            text-decoration: underline;
+        }}
+    </style>
+</head>
+<body contenteditable="true">
         {html_content}
     </body>
     </html>"""
