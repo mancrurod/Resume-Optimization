@@ -3,14 +3,31 @@ import docx
 import re
 from lxml import etree
 
+STYLE_TO_MD = {
+    "Nombre": lambda text: f"# {text}",
+    "Role": lambda text: f"**{text}**",
+    "Contacto": lambda text: f"*{text}*",
+    "Heading 1": lambda text: f"## {text}",
+    "Heading 2": lambda text: f"### {text}",
+    "Heading 3": lambda text: f"#### {text}",
+    "Bullet": lambda text: f"- {text.lstrip('-• ').strip()}",
+    "Normal": lambda text: text,
+}
+
+def normalize_spacing(text):
+    import re
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"\s+([.,;:!?])", r"\1", text)
+    return text.strip() + "\n"
+
 
 def convert_docx_to_md(input_path: str, output_path: str):
     doc = docx.Document(input_path)
     rels = extract_hyperlinks(doc)
     md_lines = []
 
-    for i, para in enumerate(doc.paragraphs):
-        line = process_paragraph(para, rels, is_first=(i == 0))
+    for para in doc.paragraphs:
+        line = process_paragraph(para, rels)
         if line:
             md_lines.append(line)
 
@@ -22,118 +39,61 @@ def convert_docx_to_md(input_path: str, output_path: str):
 
     with open(output_path, "w", encoding="utf-8") as md_file:
         md_file.write(content)
-    print(f"✅ Markdown saved to {output_path}")
-
+    print(f"\u2705 Markdown saved to {output_path}")
 
 def extract_hyperlinks(doc):
     return {r.rId: r._target for r in doc.part.rels.values() if "hyperlink" in r.reltype}
 
-
-def process_paragraph(para, rels, is_first=False):
+def process_paragraph(para, rels):
     text = extract_runs(para, rels).strip()
     if not text:
         return ""
 
-    if is_first:
-        return f"# {text}"
-
-    if is_contact_title(text):
-        return f"**{text}**"
-
-    if is_contact_info(text):
-        return text
-
-    if is_section_header(text):
-        return f"## {text}"
-
-    if is_project_header(text):
-        title, date = split_project_header(text)
-        return f"### {title}\n_{date}_"
-
-    if is_experience_title(text):
-        return f"### {text}"
-
+    style = para.style.name
+    if style in STYLE_TO_MD:
+        return STYLE_TO_MD[style](text)
     if text.startswith("- ") or "•" in text:
         return f"- {text.lstrip('-• ').strip()}"
-
     return text
-
 
 def extract_runs(para, rels):
     result = []
     root = etree.fromstring(para._element.xml)
     ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 
-    for elem in root.xpath(".//w:r | .//w:hyperlink", namespaces=ns):
+    seen_texts = set()
+
+    for elem in root.xpath(".//w:hyperlink | .//w:r", namespaces=ns):
         if etree.QName(elem).localname == "hyperlink":
             rel_id = elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
             if rel_id in rels:
                 url = rels[rel_id]
-                text = "".join(t.text for t in elem.xpath(".//w:t", namespaces=ns))
-                result.append(f"[{text}]({url})")
-        else:
+                text = "".join(t.text for t in elem.xpath(".//w:t", namespaces=ns) if t.text).strip()
+                norm_text = re.sub(r"\s+", " ", text)
+                if norm_text and norm_text not in seen_texts:
+                    result.append(f"[{norm_text}]({url})")
+                    seen_texts.add(norm_text)
+        elif etree.QName(elem).localname == "r":
+            # Solo procesamos si este <w:r> no está dentro de un <w:hyperlink>
+            if elem.getparent() is not None and etree.QName(elem.getparent()).localname == "hyperlink":
+                continue
             t = elem.xpath(".//w:t", namespaces=ns)
             if t and t[0].text:
                 text = t[0].text.strip()
-                if not text:
+                norm_text = re.sub(r"\s+", " ", text)
+                if not norm_text or norm_text in seen_texts:
                     continue
                 is_bold = elem.xpath(".//w:b", namespaces=ns)
                 is_italic = elem.xpath(".//w:i", namespaces=ns)
 
                 if is_bold and is_italic:
-                    result.append(f"***{text}***")
+                    result.append(f"***{norm_text}***")
                 elif is_bold:
-                    result.append(f"**{text}**")
+                    result.append(f"**{norm_text}**")
                 elif is_italic:
-                    result.append(f"*{text}*")
+                    result.append(f"*{norm_text}*")
                 else:
-                    result.append(text)
+                    result.append(norm_text)
+                seen_texts.add(norm_text)
+
     return " ".join(result)
-
-
-def process_table(table):
-    rows = [[cell.text.strip() for cell in row.cells] for row in table.rows]
-    if not rows:
-        return ""
-    header = "| " + " | ".join(rows[0]) + " |"
-    divider = "| " + " | ".join(["---"] * len(rows[0])) + " |"
-    body = "\n".join("| " + " | ".join(row) + " |" for row in rows[1:])
-    return f"{header}\n{divider}\n{body}"
-
-
-def normalize_spacing(text):
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    text = re.sub(r"\s+([.,;:!?])", r"\1", text)
-    return text.strip() + "\n"
-
-
-def is_section_header(text):
-    known_headers = {
-        "PERFIL PROFESIONAL", "PROYECTOS DESTACADOS", "EXPERIENCIA",
-        "FORMACIÓN ACADÉMICA", "HABILIDADES TÉCNICAS", "IDIOMAS"
-    }
-    return text.upper() in known_headers or (text.isupper() and 1 <= len(text.split()) <= 5)
-
-
-def is_contact_title(text):
-    return "ANALISTA DE DATOS" in text or "PROCESAMIENTO DE LENGUAJE NATURAL" in text
-
-
-def is_contact_info(text):
-    return (
-        "@" in text or "linkedin.com" in text.lower() or "github.com" in text.lower()
-        or re.search(r"\+\d{2}", text)
-    )
-
-
-def is_project_header(text):
-    return bool(re.match(r".+\s[·\-]\s\w+", text))
-
-
-def split_project_header(text):
-    parts = re.split(r"\s[·\-]\s", text, maxsplit=1)
-    return parts[0].strip(), parts[1].strip() if len(parts) == 2 else ("", text)
-
-
-def is_experience_title(text):
-    return bool(re.match(r".+[,·].+\d{4}", text))

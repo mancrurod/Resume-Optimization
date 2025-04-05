@@ -4,7 +4,7 @@ import re
 
 def generate_prompt(md_resume: str, job_description: str) -> str:
     return f"""
-    I have a resume in Markdown format and a job description. Your task is to **refine and tailor my resume** to closely match the job requirements while ensuring it remains professional, well-structured, and ATS-friendly.  
+    I have a resume in Markdown format and a job description. Your task is to **refine and tailor my resume** to closely match the job requirements while ensuring it remains professional, well-structured, and ATS-friendly. Below are the details. You MUST follow the instructions carefully.  
 
     ### **Key Objectives:**  
     - Align my resume with the job description by emphasizing **relevant skills, experiences, and achievements**.  
@@ -12,8 +12,9 @@ def generate_prompt(md_resume: str, job_description: str) -> str:
     - **Enhance bullet points** by making them **quantifiable** and **impact-driven**.  
     - Ensure **clarity, conciseness, and a professional tone**.  
     - Maintain the **Markdown format**, preserving proper spacing, bullet points, and hyperlinks.  
-    - **Position dates** after each work/study experience on a **new line** for better readability.
-    - If my **education or experience does not fully match** the job description, identify and emphasize **transferable skills** that demonstrate my ability to perform the role effectively.  
+    - **Keep job and education dates** on the **same line**, right after the job title or degree, using a clear separator like `·`.
+    - Format each **job title** AND **degree** as: **Title**, *Institution* · Dates, keeping everything on the same line.
+    - If my **education or experience does not fully match** the job description, identify and emphasize **transferable skills** that demonstrate my ability to perform the role effectively.
 
     ### **Language Guidelines:**  
     - If **both** the resume and job description are in **Spanish**, return the revised resume in **Spanish**.  
@@ -28,8 +29,9 @@ def generate_prompt(md_resume: str, job_description: str) -> str:
     {job_description}  
 
     ### **Expected Output:**  
-    Return the **optimized resume in Markdown**, ensuring it is refined according to the outlined objectives.  
-    **Do not enclose the output in code blocks (\`\`\`), return it as plain Markdown content.**
+    - Return the **optimized resume in Markdown**, ensuring it is refined according to the outlined objectives.  
+    - **Do not enclose the output in code blocks (\`\`\`), return it as plain Markdown content.**
+    - Example for **Title**, *Institution* · Dates: **Máster en Data Science & IA**, *Evolve Academy* · Enero 2025 - Junio 2025
     """
 
 def get_latest_docx_file(input_folder: str) -> str:
