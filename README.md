@@ -19,21 +19,23 @@ Welcome to **Resume Optimization** — a modular Python project that turns your 
 ```
 Resume-Optimization/
 │
-├── main.py                   # Orchestrates the ETL pipeline
-├── convert_to_md.py          # DOCX → clean Markdown
-├── export_resume.py          # Markdown → HTML + PDF (with HTML editor!)
+├── original_docx/            # Your original .docx resumes
+├── pdf_cv/                   # Final PDF output
+├── processed_cv/             # Cleaned Markdown/HTML output
 │
-├── src/
+├── src/                      # All scripts live here
+│   ├── convert_to_md.py      # DOCX → clean Markdown
+│   ├── export_resume.py      # Markdown → HTML + PDF (with HTML editor!)
 │   ├── adapt_cv.py           # Uses GPT-4o-mini to tailor your resume
 │   └── ...                   # Other modular tools and helpers
 │
-├── data/
-│   └── your_resume.docx      # Drop your source file here
-│
-├── output/
-│   ├── adapted_resume.md     # GPT-enhanced Markdown version
-│   ├── resume.html           # Ready-to-edit HTML
-│   └── resume.pdf            # Final export
+├── .env                      # OpenAI keys or API credentials
+├── .gitignore
+├── environment.yml           # Conda environment file
+├── job_description.txt       # Paste a JD here to adapt your resume to it
+├── main.py                   # Orchestrates the pipeline
+├── README.md
+└── requirements.txt
 ```
 
 ---
@@ -45,21 +47,21 @@ Turn `.docx` into Markdown with proper headings, bullet points, and structure �
 *Spoiler: It probably was.*
 
 ```bash
-python convert_to_md.py
+python src/convert_to_md.py
 ```
 
 ### 2. Adapt (Optional)
 Feed the Markdown into GPT-4o-mini and let the AI highlight what recruiters want to see. Buzzwords included, guilt-free.
 
 ```bash
-python adapt_cv.py --job-description job.txt
+python src/adapt_cv.py --job-description job_description.txt
 ```
 
 ### 3. Export & Edit
 Generate beautiful HTML + PDF files with typographic control. Then tweak the HTML visually with a full WYSIWYG editor.
 
 ```bash
-python export_resume.py
+python src/export_resume.py
 ```
 
 ---
@@ -84,6 +86,13 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
+
+Or, using Conda:
+
+```bash
+conda env create -f environment.yml
+conda activate resume_optimization
 ```
 
 ---
