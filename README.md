@@ -1,139 +1,109 @@
-# 📄 Resume Optimization Project
+# 📄 Resume Optimization
 
-## 🚀 Overview
-
-Automate your resume optimization process with AI! This project transforms `.docx` resumes into Markdown, customizes them based on job descriptions, and exports the final versions in **HTML** and **PDF** formats.
+Welcome to **Resume Optimization** — a modular Python project that turns your humble `.docx` resume into a lean, clean, ATS-beating machine. With the help of LLMs, Markdown, and just enough automation to make it magic, your CV will finally look like it belongs in 2025.
 
 ---
 
-## 📂 Project Structure
+## 🚀 What This Project Does
+
+1. **Converts** your `.docx` resume to structured `Markdown`.
+2. **Adapts** the content using GPT-4o-mini to better match a job description (optionally).
+3. **Exports** the adapted Markdown to `HTML` and `PDF`, with editable HTML styling.
+4. **Lets you edit** the final HTML with a built-in visual editor (in PyQt5).
+5. **Keeps things modular**, so you can swap in different models, templates or flows.
+
+---
+
+## 🧱 Project Structure
 
 ```
 Resume-Optimization/
-├── original_docx/           # Store original .docx resumes
-├── processed_cv/            # Store Markdown and intermediate resumes
-├── pdf_cv/                  # Store final PDFs
-├── src/                     # Source code
-│   ├── convert_to_md.py     # Step 1: Convert .docx to Markdown
-│   ├── optimize_resume.py   # Step 2: Generate AI optimization prompt
-│   ├── adapt_cv.py          # Step 3: Adapt resume using AI APIs
-│   ├── export_resume.py     # Step 4: Convert Markdown to HTML & PDF
-├── job_description.txt      # Store the target job description
-├── requirements.txt         # List of dependencies
-├── .env                     # Environment variables (API keys)
-├── .gitignore               # Ignore unnecessary files
-└── README.md                # Project documentation
+│
+├── main.py                   # Orchestrates the ETL pipeline
+├── convert_to_md.py          # DOCX → clean Markdown
+├── export_resume.py          # Markdown → HTML + PDF (with HTML editor!)
+│
+├── src/
+│   ├── adapt_cv.py           # Uses GPT-4o-mini to tailor your resume
+│   └── ...                   # Other modular tools and helpers
+│
+├── data/
+│   └── your_resume.docx      # Drop your source file here
+│
+├── output/
+│   ├── adapted_resume.md     # GPT-enhanced Markdown version
+│   ├── resume.html           # Ready-to-edit HTML
+│   └── resume.pdf            # Final export
+```
+
+---
+
+## 🤖 How It Works
+
+### 1. Convert
+Turn `.docx` into Markdown with proper headings, bullet points, and structure — even if your original Word doc was a mess.  
+*Spoiler: It probably was.*
+
+```bash
+python convert_to_md.py
+```
+
+### 2. Adapt (Optional)
+Feed the Markdown into GPT-4o-mini and let the AI highlight what recruiters want to see. Buzzwords included, guilt-free.
+
+```bash
+python adapt_cv.py --job-description job.txt
+```
+
+### 3. Export & Edit
+Generate beautiful HTML + PDF files with typographic control. Then tweak the HTML visually with a full WYSIWYG editor.
+
+```bash
+python export_resume.py
 ```
 
 ---
 
 ## ✨ Features
 
-✔ **Convert Resumes**: Preserve formatting when converting `.docx` to Markdown.  
-✔ **Smart Prompting**: AI-generated prompts tailored to job descriptions.  
-✔ **AI-Powered Customization**: Rewrite resumes using OpenAI and Google APIs.  
-✔ **Multi-Format Export**: Save the adapted resume as **Markdown, HTML, and PDF**.
+- **ATS-friendly output**: Clean, semantic HTML and Markdown.
+- **Visual HTML editor**: Built with PyQt5 and QWebEngineView.
+- **Model-agnostic**: Swap GPT with any other LLM or skip it altogether.
+- **Custom styling**: Typography based on EB Garamond + Roboto.
+- **Nerd-approved**: Follows SOLID principles and clean code practices.
 
 ---
 
-## ⚙️ Prerequisites
+## 🛠 Requirements
 
-Ensure you have the following installed:
+- Python 3.10+
+- `docx`, `markdown2`, `pdfkit`, `PyQt5`, `openai` (if you adapt with GPT)
+- `wkhtmltopdf` installed and in your PATH for PDF export
 
-- **Python**: Version 3.8+
-- **`wkhtmltopdf`**: Required for PDF generation ([installation guide](https://github.com/JazzCore/python-pdfkit/wiki/Installing-wkhtmltopdf))
-- **API Keys**:
-  - OpenAI (`OPENAI_API_KEY`)
-  - Google (`GOOGLE_API_KEY`)
+Install dependencies:
 
----
-
-## 📥 Installation
-
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/your-username/resume-optimization.git
-    cd resume-optimization
-    ```
-2. **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-3. **Install `wkhtmltopdf`**:  
-    Follow the [installation guide](https://github.com/JazzCore/python-pdfkit/wiki/Installing-wkhtmltopdf).
-4. **Set up environment variables**:
-    - Create a `.env` file and add:
-      ```env
-      OPENAI_API_KEY=your_openai_api_key
-      GOOGLE_API_KEY=your_google_api_key
-      ```
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## 📖 Usage
+## 🤓 Who Made This?
 
-1. Place your `.docx` resume in the `original_docx/` folder.
-2. Copy the target job description into `job_description.txt`.
-3. Ensure your API keys are set.
-4. Run the script:
-    ```bash
-    python main.py
-    ```
-5. Your optimized resume will be saved as:
-    - **Markdown** → `processed_cv/adapted_resume.md`
-    - **HTML** → `processed_cv/Your Name CV.html`
-    - **PDF** → `pdf_cv/Your Name CV.pdf`
+Crafted by **Manuel Cruz Rodríguez**, Data Analyst and NLP explorer.  
+Fueled by Markdown, espresso, and a mild obsession with resume formatting.
+
+> "Because your skills deserve better than Word Art."
 
 ---
 
-## 🔄 Workflow
+## 📬 Contributing / Feedback
 
-1. **Convert to Markdown** → Transforms `.docx` into Markdown format.
-2. **Generate AI Prompt** → Creates a job-specific optimization prompt.
-3. **AI Resume Adaptation** → Uses AI to refine and rewrite your resume.
-4. **Manual Editing (Optional)** → Adjust HTML for final touches before export.
-5. **Export Resume** → Saves in **HTML & PDF** formats.
+Spotted a bug? Have a feature request? Want your resume to sing?  
+Open an issue or pull request — or just [connect with me](https://linkedin.com/in/mcruzrodriguez).
 
 ---
 
-## 🛠️ Troubleshooting
+## 📘 License
 
-🔹 **`wkhtmltopdf` not found** → Ensure it’s installed correctly ([guide](https://github.com/JazzCore/python-pdfkit/wiki/Installing-wkhtmltopdf)).  
-🔹 **Missing API keys** → Verify `.env` contains `OPENAI_API_KEY` and `GOOGLE_API_KEY`.  
-🔹 **No `.docx` file found** → Place a resume in `original_docx/`.  
-🔹 **Job description missing** → Ensure `job_description.txt` is populated.  
-🔹 **Formatting Issues?** → Before processing, ensure your `.docx`:
-   - Uses **justified** paragraphs for readability.
-   - Contains **bullet points** for structure.
-   - Applies **bold/italic** styles for emphasis.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository.
-2. Create a new branch:
-    ```bash
-    git checkout -b feature/new-feature
-    ```
-3. Commit your changes:
-    ```bash
-    git commit -m "Add new feature"
-    ```
-4. Push to the branch:
-    ```bash
-    git push origin feature/new-feature
-    ```
-5. Open a pull request.
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**. See `LICENSE` for details.
-
----
-
-🚀 **Get started today and optimize your resume like a pro!**
-
-Now you can copy and paste this directly into your `README.md` file. Let me know if you need any further tweaks! 🚀
+MIT. Use it, fork it, remix it. Just don’t make a Comic Sans version. Please.

@@ -1,137 +1,139 @@
 import os
 import docx
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from lxml import etree  # Import lxml for XML parsing
+import re
+from lxml import etree
+
 
 def convert_docx_to_md(input_path: str, output_path: str):
-    """Converts a .docx file to Markdown format while preserving formatting."""
     doc = docx.Document(input_path)
-    md_lines = []
     rels = extract_hyperlinks(doc)
-    
-    for para in doc.paragraphs:
-        process_paragraph(para, md_lines, rels)
-    
+    md_lines = []
+
+    for i, para in enumerate(doc.paragraphs):
+        line = process_paragraph(para, rels, is_first=(i == 0))
+        if line:
+            md_lines.append(line)
+
     for table in doc.tables:
-        process_table(table, md_lines)
-    
+        md_lines.append(process_table(table))
+
+    content = "\n".join(md_lines)
+    content = normalize_spacing(content)
+
     with open(output_path, "w", encoding="utf-8") as md_file:
-        md_file.write("\n".join(md_lines))
-    print(f"✅ Markdown file saved: {output_path}")
+        md_file.write(content)
+    print(f"✅ Markdown saved to {output_path}")
+
 
 def extract_hyperlinks(doc):
-    """Extracts hyperlinks from the document relationships."""
-    hyperlinks = {}
-    for rel in doc.part.rels.values():
-        if "hyperlink" in rel.reltype:
-            hyperlinks[rel.rId] = rel._target
-    return hyperlinks
+    return {r.rId: r._target for r in doc.part.rels.values() if "hyperlink" in r.reltype}
 
-def process_paragraph(para, md_lines, rels):
-    """Processes a paragraph and converts it to Markdown."""
-    text = process_runs(para, rels)
-    if not text.strip():
-        md_lines.append("")
-        return
-    
-    style_name = para.style.name.lower() if para.style else ""
-    if "heading" in style_name:
-        heading_level = min(extract_heading_level(style_name), 6)
-        md_lines.append(f"{'#' * heading_level} {text}")
-    elif is_bulleted_list(para):
-        md_lines.append(f"- {text}")  # Treat as bullet point in Markdown
-    elif is_numbered_list(para):
-        md_lines.append(f"1. {text}")
-    elif para.alignment == WD_PARAGRAPH_ALIGNMENT.CENTER:
-        md_lines.append(f"<div align=\"center\">{text}</div>")
-    else:
-        md_lines.append(text)
 
-def process_runs(para, rels):
-    """Processes runs to apply Markdown styling and retain hyperlinks."""
-    result = []
-    para_xml = para._element.xml  # Get the XML of the paragraph
-    ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
-    
-    # Parse the XML using lxml
-    root = etree.fromstring(para_xml)
-    
-    # Iterate through all elements in the paragraph
-    for elem in root.xpath(".//w:r | .//w:hyperlink", namespaces=ns):
-        if etree.QName(elem).localname == "hyperlink":
-            # Handle hyperlink
-            rel_id = elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
-            if rel_id in rels:
-                # Extract text from child runs
-                hyperlink_text = "".join(run.text for run in elem.xpath(".//w:r/w:t", namespaces=ns))
-                hyperlink_url = rels[rel_id]
-                result.append(f"[{hyperlink_text}]({hyperlink_url})")
-        else:
-            # Handle regular run
-            text_elem = elem.xpath(".//w:t", namespaces=ns)
-            if text_elem:
-                text = text_elem[0].text.strip()
-                if text:
-                    # Skip if this text is already part of a hyperlink
-                    if result and result[-1].endswith(")") :
-                        continue
-                    # Apply text styles (bold, italic)
-                    is_bold = elem.xpath(".//w:b", namespaces=ns) != []
-                    is_italic = elem.xpath(".//w:i", namespaces=ns) != []
-                    if is_bold and is_italic:
-                        result.append(f"***{text}***")
-                    elif is_bold:
-                        result.append(f"**{text}**")
-                    elif is_italic:
-                        result.append(f"*{text}*")
-                    else:
-                        result.append(text)
-    return " ".join(result)  # Join with spaces to avoid concatenation issues
+def process_paragraph(para, rels, is_first=False):
+    text = extract_runs(para, rels).strip()
+    if not text:
+        return ""
 
-def apply_text_styles(run, text):
-    """Applies Markdown styles for bold and italics."""
-    if run.bold and run.italic:
-        return f"***{text}***"
-    elif run.bold:
+    if is_first:
+        return f"# {text}"
+
+    if is_contact_title(text):
         return f"**{text}**"
-    elif run.italic:
-        return f"*{text}*"
+
+    if is_contact_info(text):
+        return text
+
+    if is_section_header(text):
+        return f"## {text}"
+
+    if is_project_header(text):
+        title, date = split_project_header(text)
+        return f"### {title}\n_{date}_"
+
+    if is_experience_title(text):
+        return f"### {text}"
+
+    if text.startswith("- ") or "•" in text:
+        return f"- {text.lstrip('-• ').strip()}"
+
     return text
 
-def is_bulleted_list(para):
-    """Detects if a paragraph is a bulleted list item."""
-    if para.style and para.style.name:
-        # Check if the style name is a type of bullet list
-        return "bullet" in para.style.name.lower() or "list" in para.style.name.lower()
-    return False
 
-def is_numbered_list(para):
-    """Detects if a paragraph is a numbered list item."""
-    if para.style and para.style.name:
-        # Check if the style name indicates a numbered list
-        return "number" in para.style.name.lower() or "list" in para.style.name.lower()
-    return False
+def extract_runs(para, rels):
+    result = []
+    root = etree.fromstring(para._element.xml)
+    ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 
-def extract_heading_level(style_name):
-    """Extracts heading level from style name."""
-    for i in range(1, 7):
-        if f"heading {i}" in style_name:
-            return i
-    return 1
+    for elem in root.xpath(".//w:r | .//w:hyperlink", namespaces=ns):
+        if etree.QName(elem).localname == "hyperlink":
+            rel_id = elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
+            if rel_id in rels:
+                url = rels[rel_id]
+                text = "".join(t.text for t in elem.xpath(".//w:t", namespaces=ns))
+                result.append(f"[{text}]({url})")
+        else:
+            t = elem.xpath(".//w:t", namespaces=ns)
+            if t and t[0].text:
+                text = t[0].text.strip()
+                if not text:
+                    continue
+                is_bold = elem.xpath(".//w:b", namespaces=ns)
+                is_italic = elem.xpath(".//w:i", namespaces=ns)
 
-def process_table(table, md_lines):
-    """Converts a table to Markdown format."""
+                if is_bold and is_italic:
+                    result.append(f"***{text}***")
+                elif is_bold:
+                    result.append(f"**{text}**")
+                elif is_italic:
+                    result.append(f"*{text}*")
+                else:
+                    result.append(text)
+    return " ".join(result)
+
+
+def process_table(table):
     rows = [[cell.text.strip() for cell in row.cells] for row in table.rows]
     if not rows:
-        return
-    
-    md_lines.append("| " + " | ".join(rows[0]) + " |")
-    md_lines.append("| " + " | ".join(["---"] * len(rows[0])) + " |")
-    for row in rows[1:]:
-        md_lines.append("| " + " | ".join(row) + " |")
-    md_lines.append("")
+        return ""
+    header = "| " + " | ".join(rows[0]) + " |"
+    divider = "| " + " | ".join(["---"] * len(rows[0])) + " |"
+    body = "\n".join("| " + " | ".join(row) + " |" for row in rows[1:])
+    return f"{header}\n{divider}\n{body}"
 
-if __name__ == "__main__":
-    input_file = "Manuel Cruz Rodríguez CV.docx"
-    output_file = "Manuel_Cruz_Rodriguez_CV.md"
-    convert_docx_to_md(input_file, output_file)
+
+def normalize_spacing(text):
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r"\s+([.,;:!?])", r"\1", text)
+    return text.strip() + "\n"
+
+
+def is_section_header(text):
+    known_headers = {
+        "PERFIL PROFESIONAL", "PROYECTOS DESTACADOS", "EXPERIENCIA",
+        "FORMACIÓN ACADÉMICA", "HABILIDADES TÉCNICAS", "IDIOMAS"
+    }
+    return text.upper() in known_headers or (text.isupper() and 1 <= len(text.split()) <= 5)
+
+
+def is_contact_title(text):
+    return "ANALISTA DE DATOS" in text or "PROCESAMIENTO DE LENGUAJE NATURAL" in text
+
+
+def is_contact_info(text):
+    return (
+        "@" in text or "linkedin.com" in text.lower() or "github.com" in text.lower()
+        or re.search(r"\+\d{2}", text)
+    )
+
+
+def is_project_header(text):
+    return bool(re.match(r".+\s[·\-]\s\w+", text))
+
+
+def split_project_header(text):
+    parts = re.split(r"\s[·\-]\s", text, maxsplit=1)
+    return parts[0].strip(), parts[1].strip() if len(parts) == 2 else ("", text)
+
+
+def is_experience_title(text):
+    return bool(re.match(r".+[,·].+\d{4}", text))
