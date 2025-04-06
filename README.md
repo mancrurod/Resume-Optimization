@@ -21,26 +21,40 @@ Welcome to **Resume Optimization** — a modular, extensible pipeline that trans
 ```
 Resume-Optimization/
 │
-├── original_docx/            # Original .docx resumes (input)
-├── processed_cv/             # Intermediate Markdown, HTML, prompt
-├── pdf_cv/                   # Final exported PDFs
-├── cv_template/              # Optional base resume templates
-├── logs/                     # Pipeline logs (.log) per execution
+├── original_docx/           # Original .docx resumes (input)
+├── processed_cv/            # Intermediate Markdown, HTML, and prompt
+├── pdf_cv/                  # Final exported PDFs
+├── cv_template/             # Optional base resume templates
+├── logs/                    # Pipeline logs (.log) per execution
 │
-├── src/                      # Modular source code
+├── docs/                    # Full project documentation
+│   ├── index.md             # Docs landing page
+│   ├── overview.md
+│   ├── installation.md
+│   ├── usage.md
+│   └── scripts/             # Script-specific docs
+│       ├── convert_to_md.md
+│       ├── optimize_resume.md
+│       ├── adapt_resume.md
+│       ├── export_resume.md
+│       └── main.md
+│
+├── src/                     # Modular Python source code
 │   ├── convert_to_md.py
 │   ├── optimize_resume.py
 │   ├── adapt_resume.py
 │   ├── export_resume.py
 │   └── __init__.py
 │
-├── .env                      # 🔒 DO NOT COMMIT — contains API keys
-├── .env.example              # ✅ Safe template to share
-├── job_description.txt       # Paste job ad text here
-├── main.py                   # Full pipeline: DOCX → Markdown → GPT → PDF
+├── .env                     # 🔒 DO NOT COMMIT — contains API keys
+├── .env.example             # ✅ Safe template to share
+├── job_description.txt      # Paste job ad text here
+├── main.py                  # Full pipeline: DOCX → Markdown → GPT → PDF
 ├── requirements.txt
 ├── environment.yml
-└── README.md
+├── README.md
+├── CHANGELOG.md             # Project version history
+└── PORTFOLIO_CHECKLIST.md   # Personal quality checklist for portfolio readiness
 ```
 
 ---
