@@ -1,7 +1,19 @@
+# Ignore directories for original and processed documents
 original_docx/
-pdf_cv/
 processed_cv/
+
+# Ignore generated PDF CVs
+pdf_cv/
+
+# Ignore environment configuration files
 .env
+
+# Ignore Python bytecode cache
 src/__pycache__/
+
+# Ignore Jupyter Notebook files
 test.ipynb
+
+# Ignore job description and improvement documents
 job_description.txt
+improvements.docx

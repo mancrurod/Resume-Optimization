@@ -1,17 +1,18 @@
 # 📄 Resume Optimization
 
-Welcome to **Resume Optimization** — a modular Python project that turns your `.docx` resume into a lean, clean, ATS-beating machine. With the help of LLMs, Markdown, and just enough automation to make it magic, your CV will finally look like it belongs in 2025.
+Welcome to **Resume Optimization** — a modular, extensible pipeline that transforms your `.docx` resume into a customized, ATS-friendly PDF, fine-tuned for a specific job offer using LLMs like GPT-4o-mini or Gemini.
 
 ---
 
 ## 🚀 What This Project Does
 
 1. **Converts** your `.docx` resume into clean, structured `Markdown`.
-2. **Builds a tailored prompt** based on your resume and a job description.
-3. **Adapts** the content using GPT-4o-mini to match the job — this is the core of the optimization.
+2. **Builds a dynamic LLM prompt** based on your resume and a job description.
+3. **Adapts** the content using GPT or Gemini to match job requirements.
 4. **Exports** the adapted Markdown to beautiful `HTML` and `PDF`.
-5. **Lets you tweak** the final HTML visually with a built-in editor.
-6. **Keeps things modular**, so you can swap models, templates, or scripts easily.
+5. **Opens a visual editor** so you can tweak the final HTML by hand.
+6. **Logs everything** and validates your files to avoid surprises.
+7. **Previews the final PDF** automatically.
 
 ---
 
@@ -20,21 +21,23 @@ Welcome to **Resume Optimization** — a modular Python project that turns your 
 ```
 Resume-Optimization/
 │
-├── cv_template/              # Optional resume templates (e.g. template.docx)
-├── original_docx/            # Your original .docx resumes
+├── original_docx/            # Original .docx resumes (input)
+├── processed_cv/             # Intermediate Markdown, HTML, prompt
 ├── pdf_cv/                   # Final exported PDFs
-├── processed_cv/             # Markdown + HTML outputs (auto-generated)
+├── cv_template/              # Optional base resume templates
+├── logs/                     # Pipeline logs (.log) per execution
 │
-├── src/                      # All core scripts live here
-│   ├── convert_to_md.py      # DOCX → Markdown (structure preserved)
-│   ├── optimize_resume.py    # Builds prompt for LLM based on job and CV
-│   ├── adapt_cv.py           # GPT-powered adaptation using that prompt
-│   ├── export_resume.py      # Markdown → HTML + PDF (+ WYSIWYG editor)
-│   └── ...
+├── src/                      # Modular source code
+│   ├── convert_to_md.py
+│   ├── optimize_resume.py
+│   ├── adapt_resume.py
+│   ├── export_resume.py
+│   └── __init__.py
 │
-├── .env                      # OpenAI API keys and credentials
-├── job_description.txt       # Paste job ad text here to tailor your resume
-├── main.py                   # Full pipeline from DOCX → PDF
+├── .env                      # 🔒 DO NOT COMMIT — contains API keys
+├── .env.example              # ✅ Safe template to share
+├── job_description.txt       # Paste job ad text here
+├── main.py                   # Full pipeline: DOCX → Markdown → GPT → PDF
 ├── requirements.txt
 ├── environment.yml
 └── README.md
@@ -42,57 +45,64 @@ Resume-Optimization/
 
 ---
 
-## 🤖 How It Works
+## 🤖 Pipeline Overview
 
-### 1. Convert: DOCX → Markdown
+### 1. Convert DOCX → Markdown
 
 ```bash
 python src/convert_to_md.py
 ```
 
-Creates a Markdown version of your resume with proper headers, bullet points, and structure — even if your Word doc was chaotic.
+Creates a structured Markdown version of your resume with headers, lists, formatting, and hyperlinks.
 
-### 2. Generate Prompt
+### 2. Generate LLM Prompt
 
 ```bash
 python src/optimize_resume.py
 ```
 
-Builds a tailored prompt based on your resume content and job description. Saves it to `processed_cv/prompt.txt`.
+Generates a detailed, language-aware prompt using your resume and a job description.
 
-### 3. Adapt
+### 3. Adapt Resume with LLM
 
 ```bash
-python src/adapt_cv.py --job-description job_description.txt
+python src/adapt_resume.py
 ```
 
-Uses GPT-4o-mini (or Gemini as fallback) to align your resume with the job post. Adds keywords, improves bullet points, and enhances ATS compatibility.
+Uses OpenAI's GPT-4o-mini or Gemini as fallback to tailor your resume to the job description.
 
-### 4. Export & Edit
+### 4. Export to HTML + Edit
 
 ```bash
 python src/export_resume.py
 ```
 
-Converts the adapted Markdown into HTML and PDF. Edit the HTML visually in a PyQt5-based WYSIWYG editor.
+Converts the adapted Markdown to HTML and opens a WYSIWYG editor to polish the formatting.
 
-### 🔁 Full Pipeline
+### 5. Generate PDF
 
-To run everything in one go:
+Done automatically when you run the pipeline — and the PDF opens instantly when done ✅
+
+### 🔁 Full Pipeline (Recommended)
 
 ```bash
 python main.py
 ```
 
+This script orchestrates the entire process, including file validation, logging, LLM calls, editing, exporting, and preview.
+
 ---
 
 ## ✨ Features
 
-- **ATS-friendly output**: Clean Markdown and semantic HTML.
-- **Visual HTML editor**: Powered by PyQt5 and QWebEngineView.
-- **Models to choose from**: Use OpenAI or Gemini.
-- **Custom styling**: Built-in HTML themes with Garamond + Roboto.
-- **Well-structured code**: SOLID principles, modularity, and clarity.
+- ✅ **End-to-end pipeline** from `.docx` to `PDF`.
+- ✍️ **Visual HTML editor** (PyQt5-based).
+- 🧠 **Smart prompt generation** with multilingual LLM support.
+- 📂 **Logging per execution** (`logs/resume_YYYYMMDD_HHMMSS.log`).
+- 🔍 **Validation** of `.docx` inputs before processing.
+- 🧾 **`.env.example`** for easy setup.
+- 🖼️ **Auto-preview** of the final PDF on completion.
+- 🧱 **Modular code**, fully SOLID and documented.
 
 ---
 
@@ -100,8 +110,8 @@ python main.py
 
 - Python 3.10+
 - [`wkhtmltopdf`](https://wkhtmltopdf.org/) (must be in your system PATH)
-- Key Python packages:
-  - `python-docx`, `markdown2`, `pdfkit`, `openai`, `PyQt5`
+- Key packages:
+  - `python-docx`, `markdown2`, `pdfkit`, `openai`, `PyQt5`, `google-generativeai`
 
 Install with pip:
 
@@ -118,31 +128,44 @@ conda activate resume_optimization
 
 ---
 
-## 📌 Roadmap & Ideas
+## 🔐 Setup
 
-- [ ] Add support for multiple resumes and job descriptions in batch mode.
-- [ ] Plug-and-play support for Claude/Gemini/LLama2.
-- [ ] Deploy as a web app with Flask or Streamlit.
-- [ ] Add CI tests for Markdown structure.
+1. Copy `.env.example` → `.env`
+2. Add your API keys:
 
----
-
-## 🤓 About the Author
-
-Crafted by **Manuel Cruz Rodríguez**, Data Analyst and NLP explorer.  
-Fueled by Markdown, espresso, and a mild obsession with resume formatting.
-
-> "Because your skills deserve better than Word Art."
+```dotenv
+OPENAI_API_KEY=your_openai_key_here
+GOOGLE_API_KEY=your_gemini_key_here
+```
 
 ---
 
-## 📬 Feedback & Contributions
+## 📌 Roadmap
 
-Found a bug? Have an idea? Want your resume to sing?  
-Open an issue, fork the repo, or just [connect on LinkedIn](https://www.linkedin.com/in/mancrurod/).
+- [x] Add logging system and `.log` files
+- [x] Validate `.docx` input structure
+- [x] Previsualize exported PDF automatically
+- [x] Add `.env.example` for safer sharing
+- [ ] Add versioned filenames with timestamps
+- [ ] Batch mode: multiple resumes / jobs
+- [ ] Streamlit web version (GUI)
+- [ ] Add Claude or LLama2 support
+
+---
+
+## 👨‍💻 Author
+
+Crafted with care by **Manuel Cruz Rodríguez**,  
+Graduate in Hispanic Philology, NLP specialist, and AI enthusiast.
+
+> “Because your skills deserve better than a Word template.”
+
+🔗 [LinkedIn](https://www.linkedin.com/in/mancrurod/)  
+📫 Feel free to fork, star, or open issues for feedback!
 
 ---
 
 ## 📘 License
 
-MIT. Use it, fork it, remix it. Just don’t make a Comic Sans version. Please.
+MIT — free to use, modify, and share.  
+Please don’t generate Comic Sans PDFs. 🥲

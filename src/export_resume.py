@@ -1,8 +1,8 @@
 import sys
 import os
+import re
 import markdown2
 import pdfkit
-import re
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QPushButton, QMessageBox, 
     QHBoxLayout, QLineEdit, QDialog, QFormLayout, QLabel
@@ -10,21 +10,34 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 
+# -------------------- UTILITIES --------------------
 
-# ---------- UTILS ----------
 def remove_code_block_wrapper(md_text: str) -> str:
+    """
+    Remove surrounding triple backticks if the content is wrapped as a code block.
+    """
     lines = md_text.strip().splitlines()
     if lines and lines[0].strip().startswith("```") and lines[-1].strip().startswith("```"):
         return "\n".join(lines[1:-1]).strip()
     return md_text
 
 def normalize_markdown(md_text: str) -> str:
+    """
+    Normalize whitespace in Markdown lines.
+    """
     lines = md_text.splitlines()
     return "\n".join(line.strip() for line in lines)
 
+# -------------------- MARKDOWN TO HTML --------------------
 
-# ---------- MARKDOWN TO HTML ----------
-def convert_md_to_html(md_path, html_path):
+def convert_md_to_html(md_path: str, html_path: str) -> None:
+    """
+    Convert a Markdown (.md) file into a styled HTML document.
+
+    Parameters:
+        md_path (str): Path to the input Markdown file.
+        html_path (str): Path to save the resulting HTML file.
+    """
     if not os.path.exists(md_path):
         raise FileNotFoundError(f"Markdown file not found: {md_path}")
 
@@ -34,11 +47,9 @@ def convert_md_to_html(md_path, html_path):
     md_content = remove_code_block_wrapper(md_content)
     md_content = normalize_markdown(md_content)
 
+    # Split header info and body
     lines = md_content.strip().splitlines()
-    name = ""
-    role = ""
-    contact_lines = []
-    content_lines = []
+    name, role, contact_lines = "", "", []
     i = 0
 
     if lines and lines[0].startswith("# "):
@@ -58,17 +69,19 @@ def convert_md_to_html(md_path, html_path):
         "fenced-code-blocks", "tables", "strike", "cuddled-lists", "metadata", "footnotes"
     ])
 
+    # Compose header
     header_html = ""
     if name:
         header_html += f"<h1>{name}</h1>\n"
     if role:
         header_html += f"<p><strong>{role}</strong></p>\n"
     for line in contact_lines:
-        if re.match(r"^_?.*\d{4}.*_?$", line):  # si parece una fecha
+        if re.match(r"^_?.*\d{4}.*_?$", line):
             header_html += f'<p class="date">{line.strip("_")}</p>\n'
         else:
             header_html += markdown2.markdown(line)
 
+    # Assemble final HTML document
     html_document = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -147,23 +160,38 @@ def convert_md_to_html(md_path, html_path):
         html_file.write(html_document)
 
 
-# ---------- HTML TO PDF ----------
-def convert_html_to_pdf(html_path, pdf_path):
+# -------------------- HTML TO PDF --------------------
+
+def convert_html_to_pdf(html_path: str, pdf_path: str) -> None:
+    """
+    Convert an HTML file to a styled PDF using pdfkit.
+
+    Parameters:
+        html_path (str): Input HTML file.
+        pdf_path (str): Output PDF path.
+    """
     if not os.path.exists(html_path):
         raise FileNotFoundError(f"HTML file not found: {html_path}")
 
     options = {
-        'encoding': 'UTF-8', 'page-size': 'A4', 'margin-top': '20mm',
-        'margin-bottom': '20mm', 'margin-left': '20mm', 'margin-right': '20mm',
-        'minimum-font-size': '16', 'enable-local-file-access': '', 'dpi': '300',
+        'encoding': 'UTF-8', 'page-size': 'A4',
+        'margin-top': '20mm', 'margin-bottom': '20mm',
+        'margin-left': '20mm', 'margin-right': '20mm',
+        'minimum-font-size': '16',
+        'enable-local-file-access': '',
+        'dpi': '300',
     }
 
     config = pdfkit.configuration()
     pdfkit.from_file(html_path, pdf_path, configuration=config, options=options)
 
 
-# ---------- HTML EDITOR ----------
+# -------------------- HTML EDITOR --------------------
+
 class InsertLinkDialog(QDialog):
+    """
+    Dialog to insert a hyperlink with custom URL and anchor text.
+    """
     def __init__(self, selected_text=""):
         super().__init__()
         self.setWindowTitle("Insert Link")
@@ -189,6 +217,9 @@ class InsertLinkDialog(QDialog):
 
 
 class HTMLEditor(QWidget):
+    """
+    Full-featured HTML editor using PyQt5 with formatting toolbar.
+    """
     def __init__(self, html_path):
         super().__init__()
         self.html_path = html_path
@@ -209,6 +240,9 @@ class HTMLEditor(QWidget):
         self.layout.addWidget(save_button)
 
     def add_toolbar_buttons(self):
+        """
+        Add formatting buttons (bold, italic, lists, alignments, etc.)
+        """
         buttons = {
             "Bold": "bold", "Italic": "italic", "Underline": "underline", "Strikethrough": "strikeThrough",
             "H1": "formatBlock|<h1>", "H2": "formatBlock|<h2>", "H3": "formatBlock|<h3>",
@@ -255,7 +289,13 @@ class HTMLEditor(QWidget):
         self.close()
 
 
-def edit_html_content(html_path):
+def edit_html_content(html_path: str) -> None:
+    """
+    Launch the HTML editor for manual visual editing.
+
+    Parameters:
+        html_path (str): Path to the HTML file to edit.
+    """
     app = QApplication(sys.argv)
     editor = HTMLEditor(html_path)
     editor.show()
