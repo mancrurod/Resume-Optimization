@@ -17,3 +17,6 @@ test.ipynb
 # Ignore job description and improvement documents
 job_description.txt
 improvements.docx
+
+# Ignore logs
+logs/

@@ -28,7 +28,6 @@ I have a resume in Markdown format and a job description. Your task is to **refi
 ### **Language Guidelines:**  
 - If **both** the resume and job description are in **Spanish**, return the revised resume in **Spanish**.  
 - If **both** are in **English**, return the revised resume in **English**.  
-- If they are in **different languages**, keep the language of the original resume.  
 
 ### **Input Data:**  
 #### **Resume (Markdown format):**  

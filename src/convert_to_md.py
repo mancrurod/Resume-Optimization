@@ -119,28 +119,60 @@ def process_table(table: docx.table.Table) -> str:
 
 def convert_docx_to_md(input_path: str, output_path: str) -> None:
     """
-    Main function that converts a .docx file into a Markdown (.md) file.
+    Convert a .docx resume file into a structured Markdown (.md) file.
+    
+    This function parses paragraphs and tables from a Word document,
+    applies Markdown formatting based on paragraph styles, and inserts
+    blank lines when transitioning between list items and new sections 
+    (e.g., new work or education entries) to preserve the visual structure
+    of the original document.
+    
+    Parameters:
+    ----------
+    input_path : str
+        Path to the input .docx file.
+    output_path : str
+        Path where the output .md file will be saved.
     """
+    # Load the Word document and extract hyperlink relationships
     doc = docx.Document(input_path)
     rels = extract_hyperlinks(doc)
     md_lines = []
 
-    # Process paragraphs
-    for para in doc.paragraphs:
-        line = process_paragraph(para, rels)
-        if line:
-            md_lines.append(line)
+    # Track the style of the previous paragraph to detect transitions
+    previous_style = ""
 
-    # Process tables
+    # Process each paragraph in the document
+    for para in doc.paragraphs:
+        # Convert the paragraph to Markdown using its style and content
+        line = process_paragraph(para, rels)
+        if not line:
+            continue  # Skip empty lines
+
+        current_style = para.style.name
+
+        # Insert a blank line when transitioning from a bullet list or normal text
+        # to a new heading or different paragraph style
+        if (
+            previous_style in ("Bullet", "Normal")
+            and current_style not in ("Bullet", "Normal")
+        ):
+            md_lines.append("")  # Insert blank line for readability
+
+        # Add the formatted line to the Markdown output
+        md_lines.append(line)
+        previous_style = current_style
+
+    # Process and append any tables in the document
     for table in doc.tables:
         md_lines.append(process_table(table))
 
-    # Combine and clean text
+    # Combine all lines into a single Markdown string and normalize spacing
     content = "\n".join(md_lines)
     content = normalize_spacing(content)
 
-    # Write Markdown output
+    # Save the final Markdown output to file
     with open(output_path, "w", encoding="utf-8") as md_file:
         md_file.write(content)
 
-    print(f"\u2705 Markdown saved to {output_path}")
+    print(f"✅ Markdown saved to {output_path}")
