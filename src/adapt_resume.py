@@ -1,8 +1,8 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI, RateLimitError, OpenAIError
-import google.generativeai as genai
-from google.api_core import retry
+import os  # Module for interacting with the operating system
+from dotenv import load_dotenv  # Module for loading environment variables from a .env file
+from openai import OpenAI, RateLimitError, OpenAIError  # OpenAI SDK for interacting with OpenAI APIs
+import google.generativeai as genai  # Google Generative AI SDK
+from google.api_core import retry  # Retry mechanism for handling transient errors
 
 def load_api_keys() -> dict:
     """
@@ -11,12 +11,11 @@ def load_api_keys() -> dict:
     Returns:
         dict: Dictionary with keys for OpenAI and Google.
     """
-    load_dotenv()
+    load_dotenv()  # Load environment variables from a .env file
     return {
-        "openai": os.getenv("OPENAI_API_KEY"),
-        "google": os.getenv("GOOGLE_API_KEY")
+        "openai": os.getenv("OPENAI_API_KEY"),  # Fetch OpenAI API key
+        "google": os.getenv("GOOGLE_API_KEY")  # Fetch Google API key
     }
-
 
 def read_prompt_file(prompt_path: str) -> str:
     """
@@ -28,9 +27,8 @@ def read_prompt_file(prompt_path: str) -> str:
     Returns:
         str: Prompt content.
     """
-    with open(prompt_path, "r", encoding="utf-8") as file:
-        return file.read()
-
+    with open(prompt_path, "r", encoding="utf-8") as file:  # Open the file in read mode with UTF-8 encoding
+        return file.read()  # Read and return the file content
 
 def generate_resume_openai(prompt: str, api_key: str) -> str:
     """
@@ -43,17 +41,16 @@ def generate_resume_openai(prompt: str, api_key: str) -> str:
     Returns:
         str: Adapted resume in Markdown format.
     """
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key)  # Initialize OpenAI client with the provided API key
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o-mini",  # Specify the model to use
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": "You are a helpful assistant."},  # System message for context
+            {"role": "user", "content": prompt}  # User-provided prompt
         ],
-        temperature=0.25
+        temperature=0.25  # Control randomness in the response
     )
-    return response.choices[0].message.content
-
+    return response.choices[0].message.content  # Extract and return the generated content
 
 def generate_resume_google(prompt: str, api_key: str) -> str:
     """
@@ -66,18 +63,17 @@ def generate_resume_google(prompt: str, api_key: str) -> str:
     Returns:
         str: Adapted resume in Markdown format.
     """
-    genai.configure(api_key=api_key)
+    genai.configure(api_key=api_key)  # Configure the Google Generative AI client with the API key
 
-    @retry.Retry(predicate=retry.if_exception_type(Exception), deadline=60.0)
+    @retry.Retry(predicate=retry.if_exception_type(Exception), deadline=60.0)  # Retry on transient errors
     def _generate():
         model = genai.GenerativeModel(
-            "gemini-2.0-flash-lite-001",
-            generation_config={"temperature": 0.25}
+            "gemini-2.0-flash-lite-001",  # Specify the Gemini model to use
+            generation_config={"temperature": 0.25}  # Control randomness in the response
         )
-        return model.generate_content(prompt).text
+        return model.generate_content(prompt).text  # Generate and return the content
 
-    return _generate()
-
+    return _generate()  # Call the retry-wrapped function
 
 def clean_adapted_markdown(md: str) -> str:
     """
@@ -89,11 +85,10 @@ def clean_adapted_markdown(md: str) -> str:
     Returns:
         str: Cleaned Markdown text.
     """
-    lines = md.strip().splitlines()
-    if lines and lines[0].startswith("```") and lines[-1].startswith("```"):
-        lines = lines[1:-1]
-    return "\n".join(lines).strip() + "\n"
-
+    lines = md.strip().splitlines()  # Split the Markdown content into lines and strip whitespace
+    if lines and lines[0].startswith("```") and lines[-1].startswith("```"):  # Check for enclosing code blocks
+        lines = lines[1:-1]  # Remove the first and last lines if they are code block markers
+    return "\n".join(lines).strip() + "\n"  # Join the cleaned lines and ensure a trailing newline
 
 def write_to_file(content: str, path: str) -> None:
     """
@@ -103,9 +98,8 @@ def write_to_file(content: str, path: str) -> None:
         content (str): Markdown content to write.
         path (str): Path to the output .md file.
     """
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(content)
-
+    with open(path, "w", encoding="utf-8") as f:  # Open the file in write mode with UTF-8 encoding
+        f.write(content)  # Write the content to the file
 
 def adapt_resume(prompt_path: str, output_path: str) -> None:
     """
@@ -118,24 +112,24 @@ def adapt_resume(prompt_path: str, output_path: str) -> None:
         output_path (str): Destination path for adapted Markdown resume.
     """
     try:
-        keys = load_api_keys()
-        prompt = read_prompt_file(prompt_path)
+        keys = load_api_keys()  # Load API keys from the .env file
+        prompt = read_prompt_file(prompt_path)  # Read the prompt from the specified file
 
         try:
-            raw = generate_resume_openai(prompt, keys["openai"])
-        except RateLimitError:
-            print("⚠️ OpenAI rate limit hit, using Gemini...")
-            raw = generate_resume_google(prompt, keys["google"])
+            raw = generate_resume_openai(prompt, keys["openai"])  # Try generating the resume using OpenAI
+        except RateLimitError:  # Handle OpenAI rate limit errors
+            print("⚠️ OpenAI rate limit hit, using Gemini...")  # Notify the user about fallback
+            raw = generate_resume_google(prompt, keys["google"])  # Fallback to Google's Gemini model
 
-        resume = clean_adapted_markdown(raw)
-        write_to_file(resume, output_path)
-        print(f"✅ Resume saved to {output_path}")
+        resume = clean_adapted_markdown(raw)  # Clean the generated Markdown content
+        write_to_file(resume, output_path)  # Write the cleaned content to the output file
+        print(f"✅ Resume saved to {output_path}")  # Notify the user about successful completion
 
-    except Exception as e:
-        print(f"❌ Error: {e}")
-
+    except Exception as e:  # Catch any unexpected errors
+        print(f"❌ Error: {e}")  # Print the error message
 
 if __name__ == "__main__":
+    # Define the input prompt file and output resume file paths
     prompt_file = "processed_cv/prompt.txt"
     output_file = "processed_cv/adapted_resume.md"
-    adapt_resume(prompt_file, output_file)
+    adapt_resume(prompt_file, output_file)  # Call the main function to adapt the resume
