@@ -26,9 +26,15 @@ I have a resume in Markdown format and a job description. Your task is to **refi
 - Format each **job title** AND **degree** as: **Title**, *Institution* · Dates, keeping everything on the same line.  
 - If my **education or experience does not fully match** the job description, identify and emphasize **transferable skills** that demonstrate my ability to perform the role effectively.
 
-### **Language Guidelines:**  
+### **Language Instructions:**  
 - If **both** the resume and job description are in **Spanish**, return the revised resume in **Spanish**.  
-- If **both** the resume and job description are in **English**, return the revised resume in **English**.  
+- If **both** are in **English**, return the revised resume in **English**.  
+- **Do NOT translate** any section unless both the resume and the job description are in a different language.
+
+### **Note:**  
+- When in doubt, preserve the original language of the input resume.  
+- Avoid automatic translation of section titles, degrees, or experience labels.  
+- Example of expected format in English: **Master’s in Data Science & AI**, *Evolve Academy* · January 2025 – June 2025
 
 ### **Input Data:**  
 #### **Resume (Markdown format):**  
@@ -40,7 +46,6 @@ I have a resume in Markdown format and a job description. Your task is to **refi
 ### **Expected Output:**  
 - Return the **optimized resume in Markdown**, ensuring it is refined according to the outlined objectives.  
 - **Do not enclose the output in code blocks (` ``` `), return it as plain Markdown content.**
-- Example for **Title**, *Institution* · Dates: **Máster en Data Science & IA**, *Evolve Academy* · Enero 2025 - Junio 2025
 """
 
 def get_latest_docx_file(input_folder: str) -> str:

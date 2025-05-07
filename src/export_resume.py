@@ -70,11 +70,13 @@ def convert_md_to_html(md_path: str, html_path: str) -> None:
         contact_lines.append(lines[i].strip())
         i += 1
 
-    # Remaining lines are the main content
-    content_lines = lines[i:]
-    html_body = markdown2.markdown("\n".join(content_lines), extras=[
+    # Ensure proper spacing between blocks for correct HTML conversion
+    content = "\n".join(lines[i:])
+    content = re.sub(r'\n(?=\S)', '\n\n', content)
+    html_body = markdown2.markdown(content, extras=[
         "fenced-code-blocks", "tables", "strike", "cuddled-lists", "metadata", "footnotes"
     ])
+
 
     # Compose the header HTML
     header_html = ""
@@ -88,36 +90,65 @@ def convert_md_to_html(md_path: str, html_path: str) -> None:
         else:
             header_html += markdown2.markdown(line)
 
-    # Assemble the final HTML document
     html_document = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Resume</title>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@600&family=Roboto:wght@400&display=swap" rel="stylesheet">
+
     <style>
+        @font-face {{
+            font-family: 'Garamond Premier Pro';
+            src: url('../assets/fonts/GaramondPremrPro.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }}
+        @font-face {{
+            font-family: 'Source Sans 3';
+            src: url('../assets/fonts/SourceSans3-Regular.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+        }}
+
         body {{
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Source Sans 3', sans-serif;
             font-size: 11pt;
-            line-height: 1.5;
+            line-height: 1.25;
             margin: 2em auto;
             max-width: 800px;
             color: #222;
+            font-weight: normal;
+            text-align: left;
         }}
-        h1, h2 {{
-            font-family: 'EB Garamond', serif;
-            font-weight: 600;
-            color: #222;
-            margin-top: 1.2em;
-            margin-bottom: 0.6em;
+        h1 {{
+            font-family: 'Garamond Premier Pro', serif;
+            font-size: 15pt;
+            font-weight: normal;
+            margin-top: 1em;
+            margin-bottom: 0.3em;
+            text-align: center;
+            color: #111;
         }}
-        h3, h4 {{
-            font-family: 'Roboto', sans-serif;
-            font-size: 11pt;
-            font-weight: 600;
+        h2 {{
+            font-family: 'Garamond Premier Pro', serif;
+            font-size: 13pt;
+            font-weight: normal;
+            margin-top: 2em;
+            margin-bottom: 0.7em;
             color: #222;
-            margin-top: 1.2em;
-            margin-bottom: 0.6em;
+            text-transform: none;
+            font-variant: small-caps;
+            letter-spacing: 0.03em;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.2em;
+        }}
+        h3 {{
+            font-family: 'Garamond Premier Pro', serif;
+            font-size: 12pt;
+            font-weight: normal;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            color: #222;
         }}
         .date {{
             font-size: 10pt;
@@ -158,10 +189,18 @@ def convert_md_to_html(md_path: str, html_path: str) -> None:
     </style>
 </head>
 <body contenteditable="true">
-{header_html}
-{html_body}
+<div class="resume-container">
+  <div class="header" style="text-align: center; margin-bottom: 1.5em;">
+    {header_html}
+  </div>
+  <div class="main">
+    {html_body}
+  </div>
+</div>
 </body>
 </html>"""
+
+
 
     # Save the HTML content to the specified file
     with open(html_path, "w", encoding="utf-8") as html_file:
