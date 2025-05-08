@@ -185,24 +185,23 @@ def main():
     md_content = read_file(md_path, logger)
     job_description = read_file(job_path, logger)
     prompt = generate_prompt(md_content, job_description)
-    prompt_path = os.path.join(output_dir, "prompt.txt")
-    save_file(prompt_path, prompt, logger)
+    save_file(os.path.join(output_dir, "prompt.txt"), prompt, logger)
 
     # Step 3: Adapt resume via LLM
     logger.info("\n🤖 Step 3: Adapting resume using LLM...")
     adapted_md_path = os.path.join(output_dir, "adapted_resume.md")
-    adapt_resume(prompt_path, adapted_md_path)
+    adapt_resume(os.path.join(output_dir, "prompt.txt"), adapted_md_path)
 
-    # Step 4: Convert Markdown to HTML
-    logger.info("\n🌐 Step 4: Converting Markdown to HTML...")
+    # Step 4: Generate editable HTML
+    logger.info("\n🌐 Step 4: Generating editable HTML for visual editor...")
     html_path = os.path.join(output_dir, os.path.splitext(docx_filename)[0] + ".html")
-    convert_md_to_html(adapted_md_path, html_path)
+    convert_md_to_html(adapted_md_path, html_path, for_editor=True)
 
-    # Step 5: Launch visual HTML editor
+    # Step 5: Launch visual HTML editor (with Georgia font)
     logger.info("\n✍️ Step 5: Opening visual HTML editor...")
     edit_html_content(html_path)
 
-    # Step 6: Convert to PDF
+    # Step 6: Export to PDF (based on edited HTML)
     logger.info("\n📄 Step 6: Exporting final resume to PDF...")
     pdf_path = os.path.join(pdf_dir, os.path.splitext(docx_filename)[0] + ".pdf")
     convert_html_to_pdf(html_path, pdf_path)
@@ -213,6 +212,7 @@ def main():
         logger.info("📂 PDF opened in default viewer.")
     except Exception as e:
         logger.warning(f"⚠️ Could not open PDF automatically: {e}")
+
 
 
 

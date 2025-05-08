@@ -30,7 +30,7 @@ def normalize_markdown(md_text: str) -> str:
 
 # -------------------- MARKDOWN TO HTML --------------------
 
-def convert_md_to_html(md_path: str, html_path: str) -> None:
+def convert_md_to_html(md_path: str, html_path: str, for_editor: bool = False):
     """
     Convert a Markdown (.md) file into a styled HTML document.
 
@@ -85,108 +85,138 @@ def convert_md_to_html(md_path: str, html_path: str) -> None:
     if role:
         header_html += f"<p><strong>{role}</strong></p>\n"
     for line in contact_lines:
-        if re.match(r"^_?.*\d{4}.*_?$", line):
-            header_html += f'<p class="date">{line.strip("_")}</p>\n'
-        else:
-            header_html += markdown2.markdown(line)
+        line = line.strip()
+        if not line:
+            continue
+        elif line.startswith("[[CONTACT]]"):
+            clean = line.replace("[[CONTACT]]", "").strip()
+
+            # If the line contains a link, convert it to HTML
+            if "[" in clean and "](" in clean:
+                rendered = markdown2.markdown(clean).strip()
+                if rendered.startswith("<p>") and rendered.endswith("</p>"):
+                    rendered = rendered[3:-4]  # elimina <p> envolvente
+                header_html += f'<p class="contact">{rendered}</p>\n'
+            else:
+                header_html += f'<p class="contact">{clean}</p>\n'
+
+    body_font = "Georgia, serif" if for_editor else "'Source Sans 3', sans-serif"
+    header_font = "Georgia, serif" if for_editor else "'Garamond Premier Pro', serif"
+    line_height = "1.4" if not for_editor else "1.6"
 
     html_document = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Resume</title>
+<style>
+    /* === Fonts === */
+    @font-face {{
+        font-family: 'Garamond Premier Pro';
+        src: url('../assets/fonts/GaramondPremrPro.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+    }}
+    @font-face {{
+        font-family: 'Garamond Premier Pro';
+        src: url('../assets/fonts/GaramondPremrPro-Bd.otf') format('opentype');
+        font-weight: bold;
+        font-style: normal;
+    }}
+    @font-face {{
+        font-family: 'Garamond Premier Pro Subhead';
+        src: url('../assets/fonts/GaramondPremrPro-Subh.otf') format('opentype');
+        font-weight: normal;
+        font-style: normal;
+    }}
+    @font-face {{
+        font-family: 'Source Sans 3';
+        src: url('../assets/fonts/SourceSans3-Regular.ttf') format('truetype');
+        font-weight: 100 900;
+        font-style: normal;
+    }}
 
-    <style>
-        @font-face {{
-            font-family: 'Garamond Premier Pro';
-            src: url('../assets/fonts/GaramondPremrPro.otf') format('opentype');
-            font-weight: normal;
-            font-style: normal;
-        }}
-        @font-face {{
-            font-family: 'Source Sans 3';
-            src: url('../assets/fonts/SourceSans3-Regular.ttf') format('truetype');
-            font-weight: 100 900;
-            font-style: normal;
-        }}
+    /* === Base === */
+    body {{
+        font-family: {body_font};
+        font-size: 11pt;
+        line-height: {line_height};
+        margin: 2em auto;
+        max-width: 800px;
+        color: #222;
+        text-align: left;
+    }}
 
-        body {{
-            font-family: 'Source Sans 3', sans-serif;
-            font-size: 11pt;
-            line-height: 1.25;
-            margin: 2em auto;
-            max-width: 800px;
-            color: #222;
-            font-weight: normal;
-            text-align: left;
-        }}
-        h1 {{
-            font-family: 'Garamond Premier Pro', serif;
-            font-size: 15pt;
-            font-weight: normal;
-            margin-top: 1em;
-            margin-bottom: 0.3em;
-            text-align: center;
-            color: #111;
-        }}
-        h2 {{
-            font-family: 'Garamond Premier Pro', serif;
-            font-size: 13pt;
-            font-weight: normal;
-            margin-top: 2em;
-            margin-bottom: 0.7em;
-            color: #222;
-            text-transform: none;
-            font-variant: small-caps;
-            letter-spacing: 0.03em;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 0.2em;
-        }}
-        h3 {{
-            font-family: 'Garamond Premier Pro', serif;
-            font-size: 12pt;
-            font-weight: normal;
-            margin-top: 1em;
-            margin-bottom: 0.5em;
-            color: #222;
-        }}
-        .date {{
-            font-size: 10pt;
-            font-style: italic;
-            margin-bottom: 0.5em;
-        }}
-        p {{
-            margin-bottom: 0.8em;
-        }}
-        ul, ol {{
-            padding-left: 2em;
-            margin-bottom: 1em;
-        }}
-        ul li, ol li {{
-            margin-bottom: 4px;
-        }}
-        #idiomas li {{
-            list-style-type: "– ";
-            margin-left: 1em;
-        }}
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1em 0;
-        }}
-        th, td {{
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }}
-        a {{
-            color: #0056b3;
-            text-decoration: none;
-        }}
-        a:hover {{
-            text-decoration: underline;
-        }}
-    </style>
+    /* === Headings === */
+    h1 {{
+        font-family: {header_font}, serif;
+        font-size: 15pt;
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 0.3em;
+        text-align: center;
+        color: #111;
+    }}
+    h2 {{
+        font-family: 'Garamond Premier Pro Subhead', serif;
+        font-size: 13pt;
+        margin-top: 1.2em;
+        margin-bottom: 0.3em;
+        color: #111;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-bottom: 1px solid #ccc;
+    }}
+
+    /* === Content === */
+    p, li {{
+        margin-bottom: 0.4em;
+        line-height: 1.3;
+    }}
+
+    ul, ol {{
+        padding-left: 2em;              /* Indent list items */
+        margin-top: 0.2em;              /* Space before the list */
+        margin-bottom: 0.6em;           /* Space after the list */
+    }}
+
+    ul li, ol li {{
+        margin-top: 0;
+        margin-bottom: 0.1em;           /* Tight spacing between bullets */
+        padding: 0;
+    }}
+
+    /* Fix extra spacing when <li> contains a <p> */
+    li > p {{
+        margin: 0.1em;                      /* Remove internal paragraph spacing */
+        line-height: 1.3;               /* Consistent line spacing inside bullets */
+    }}
+
+    strong, b {{
+        font-weight: 700;
+    }}
+
+    em, i {{
+        font-style: italic;
+    }}
+
+    .contact {{
+        font-family: 'Garamond Premier Pro', serif;
+        font-weight: bold;
+        font-size: 13pt;
+        margin-bottom: 0.3em;
+    }}
+
+    /* === Links === */
+    a {{
+        color: #0056b3;
+        text-decoration: none;
+    }}
+
+    a:hover {{
+        text-decoration: underline;
+    }}
+</style>
 </head>
 <body contenteditable="true">
 <div class="resume-container">
@@ -199,8 +229,6 @@ def convert_md_to_html(md_path: str, html_path: str) -> None:
 </div>
 </body>
 </html>"""
-
-
 
     # Save the HTML content to the specified file
     with open(html_path, "w", encoding="utf-8") as html_file:
@@ -288,6 +316,7 @@ class HTMLEditor(QWidget):
         self.layout = QVBoxLayout(self)
         self.web_view = QWebEngineView()  # Web view to display and edit HTML
         self.web_view.setUrl(QUrl.fromLocalFile(os.path.abspath(self.html_path)))
+        self.web_view.page().loadFinished.connect(self.enable_style_with_css)
         self.layout.addWidget(self.web_view)
 
         # Toolbar for formatting options
@@ -383,6 +412,14 @@ class HTMLEditor(QWidget):
             </div>
             '''
             self.run_js(f"document.execCommand('insertHTML', false, `{img_tag}`);")
+
+    def enable_style_with_css(self):
+        """
+        Ensure formatting commands like Bold/Italic use inline styles.
+        """
+        js = "document.execCommand('styleWithCSS', false, true);"
+        self.web_view.page().runJavaScript(js)
+
 
 
 def edit_html_content(html_path: str) -> None:

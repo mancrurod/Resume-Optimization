@@ -7,14 +7,13 @@ from pathlib import Path
 # === Style to Markdown mapping ===
 
 STYLE_TO_MD = {
-    "contacto": lambda text: f"**{text}**",              
+    "contacto": lambda text: f"[[CONTACT]]{text}",            
     "heading 1": lambda text: f"# {text}",               
     "heading 2": lambda text: f"## {text}",               
     "bullet": lambda text: f"- {text.lstrip('-• ').strip()}",
     "normal": lambda text: text,
     "key relevance": lambda text: f"**{text}**",
-    "fechas": lambda text: f"*{text}*",
-}
+    }
 
 DEFAULT_MD_MAPPING = lambda text: text
 
