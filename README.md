@@ -1,5 +1,11 @@
 # 📄 Resume Optimization
 
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-active-brightgreen.svg)]()
+[![Build](https://img.shields.io/badge/build-manual-lightgrey.svg)]()
+
+
 **Resume Optimization** is an end-to-end, LLM-powered pipeline that transforms a `.docx` resume into a tailored, ATS-friendly PDF aligned with a specific job description. It leverages OpenAI or Gemini for semantic rewriting and includes a visual HTML editor for layout polishing.
 
 ---
@@ -62,6 +68,13 @@ This will:
 5. 📄 Export a clean, custom-styled PDF in `pdf_cv/`
 
 > No need to run individual scripts manually — the full process is handled by `main.py`.
+
+---
+
+## 🗺️ Pipeline Architecture
+
+![Resume Optimization Pipeline](docs/assets/resume_pipeline_architecture.png)
+
 
 ---
 

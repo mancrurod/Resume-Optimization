@@ -15,14 +15,4 @@ This is your starting point to understand, run, and extend the project.
 
 ---
 
-## 🧩 Script Documentation
-
-- [📝 convert_to_md.py](scripts/convert_to_md.md)
-- [🧠 optimize_resume.py](scripts/optimize_resume.md)
-- [🤖 adapt_resume.py](scripts/adapt_resume.md)
-- [🌐 export_resume.py](scripts/export_resume.md)
-- [🔁 main.py](scripts/main.md)
-
----
-
 > All files are part of the `/docs` folder. Feel free to contribute or extend.

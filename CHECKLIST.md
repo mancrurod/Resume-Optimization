@@ -20,7 +20,7 @@ This file contains a personal checklist of best practices I follow to ensure thi
 - [x] `CHANGELOG.md` tracks changes over time.
 - [x] `docs/` folder includes script-specific documentation.
 - [x] `docs/index.md` allows easy navigation of all docs.
-- [ ] Optional: add architecture diagram or pipeline image.
+- [x] Optional: add architecture diagram or pipeline image.
 
 ---
 
@@ -50,13 +50,12 @@ This file contains a personal checklist of best practices I follow to ensure thi
 - [x] Mentions potential improvements or roadmap.
 - [x] Shows care in UX (editor, PDF preview, clear outputs).
 - [ ] Add screenshots or a short GIF demo for visual impact.
-- [ ] Optional: Add a badge for Python version or license.
+- [x] Optional: Add a badge for Python version or license.
 
 ---
 
 ## 📝 Optional for Growth
 
-- [ ] Add `CONTRIBUTING.md` if you open the repo to others.
 - [ ] Setup GitHub Pages or Streamlit for a live version.
 - [ ] Prepare presentation version (PDF or webpage) with results.
 - [ ] Export documentation to PDF with pandoc.
