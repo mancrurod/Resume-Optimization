@@ -1,94 +1,104 @@
+# === Core utilities ===
 annotated-types==0.7.0
-anyio==4.9.0
-asttokens==3.0.0
 attrs==25.3.0
-beautifulsoup4==4.13.3
-cachetools==5.5.2
-certifi==2025.1.31
-cffi==1.17.1
-charset-normalizer==3.4.1
 colorama==0.4.6
-comm==0.2.2
-debugpy==1.8.12
-decorator==5.1.1
-distro==1.9.0
-docx2txt==0.8
-executing==2.2.0
+packaging==23.2
+platformdirs==4.3.6
+psutil==6.1.1
+python-dotenv==1.0.1
+typing_extensions==4.12.2
+wcwidth==0.2.13
+
+# === HTTP + Networking ===
+httpx==0.28.1
+httpcore==1.0.7
+requests==2.32.3
+urllib3==2.3.0
+idna==3.10
+charset-normalizer==3.4.1
+PySocks==1.7.1
+
+# === PDF/HTML Export ===
+pdfkit==1.0.0
+markdown2==2.5.3
+Markdown==3.7
+lxml==5.3.1
+wkhtmltopdf (system dependency, not in pip)
+
+# === NLP + LLM APIs ===
+openai==1.66.5
+google-generativeai==0.8.4
 google-ai-generativelanguage==0.6.15
-google-api-core==2.24.2
 google-api-python-client==2.164.0
 google-auth==2.38.0
 google-auth-httplib2==0.2.0
-google-generativeai==0.8.4
 googleapis-common-protos==1.69.2
-grpcio==1.71.0
-grpcio-status==1.71.0
-h11==0.14.0
-httpcore==1.0.7
-httplib2==0.22.0
-httpx==0.28.1
-idna==3.10
-ipykernel==6.29.5
-ipython==8.32.0
-jedi==0.19.2
-jiter==0.9.0
-jupyter_client==8.6.3
-jupyter_core==5.7.2
-lxml==5.3.1
-Markdown==3.7
-markdown-it-py==3.0.0
-markdown2==2.5.3
-matplotlib-inline==0.1.7
-mdurl==0.1.2
-nest-asyncio==1.6.0
-openai==1.66.5
-outcome==1.3.0.post0
-packaging @ file:///C:/b/abs_3by6s2fa66/croot/packaging_1734472138782/work
-parso==0.8.4
-pdfkit==1.0.0
-platformdirs==4.3.6
-prompt_toolkit==3.0.50
 proto-plus==1.26.1
 protobuf==5.29.3
-psutil==6.1.1
-pure_eval==0.2.3
+httplib2==0.22.0
+uritemplate==4.1.1
+rsa==4.9
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
-pycparser==2.22
-pydantic==2.10.6
-pydantic_core==2.27.2
-Pygments==2.19.1
-pyparsing==3.2.1
+
+# === PyQt5 GUI ===
 PyQt5==5.15.11
 PyQt5-Qt5==5.15.2
 PyQt5_sip==12.17.0
 PyQtWebEngine==5.15.7
 PyQtWebEngine-Qt5==5.15.2
-PySocks==1.7.1
-python-dateutil @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/python-dateutil_1729038406576/work
+
+# === Word/Markdown Processing ===
 python-docx==1.1.2
-python-dotenv==1.0.1
-pywin32==308
-pyzmq==26.2.1
-requests==2.32.3
-rsa==4.9
-selenium==4.29.0
-setuptools==75.8.0
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-sniffio==1.3.1
-sortedcontainers==2.4.0
+docx2txt==0.8
+beautifulsoup4==4.13.3
 soupsieve==2.6
-stack-data==0.6.3
-tornado==6.4.2
-tqdm==4.67.1
+
+# === Jupyter/IPython ===
+ipykernel==6.29.5
+ipython==8.32.0
+jupyter_client==8.6.3
+jupyter_core==5.7.2
+Pygments==2.19.1
+matplotlib-inline==0.1.7
 traitlets==5.14.3
+tornado==6.4.2
+pyzmq==26.2.1
+
+# === Debugging & AST analysis ===
+asttokens==3.0.0
+executing==2.2.0
+pure_eval==0.2.3
+stack-data==0.6.3
+
+# === Prompt UI / CLI ===
+prompt_toolkit==3.0.50
+tqdm==4.67.1
+
+# === Markdown Rendering ===
+markdown-it-py==3.0.0
+mdurl==0.1.2
+
+# === Selenium (Optional Web scraping) ===
+selenium==4.29.0
+webdriver-manager==4.0.2
+
+# === Async (required by httpx, trio, etc.) ===
+anyio==4.9.0
+sniffio==1.3.1
 trio==0.29.0
 trio-websocket==0.12.2
-typing_extensions==4.12.2
-uritemplate==4.1.1
-urllib3==2.3.0
-wcwidth==0.2.13
-webdriver-manager==4.0.2
-websocket-client==1.8.0
-wheel==0.45.1
+outcome==1.3.0.post0
 wsproto==1.2.0
+websocket-client==1.8.0
+
+# === Pydantic + Validation ===
+pydantic==2.10.6
+pydantic_core==2.27.2
+
+# === Misc ===
+cffi==1.17.1
+pycparser==2.22
+six==1.16.0
+setuptools==75.8.0
+wheel==0.45.1
